@@ -13,7 +13,6 @@ import (
 	"errors"
 	"github.com/miscreant/miscreant.go/block"
 	"github.com/miscreant/miscreant.go/cmac"
-	"github.com/miscreant/miscreant.go/pmac"
 	"hash"
 )
 
@@ -65,32 +64,6 @@ func NewAESCMACSIV(key []byte) (c *Cipher, err error) {
 
 	c = new(Cipher)
 	c.h = cmac.New(macBlock)
-	c.b = ctrBlock
-
-	return c, nil
-}
-
-// NewAESPMACSIV returns a new AES-SIV cipher with the given key, which must be
-// twice as long as an AES key, either 32 or 64 bytes to select AES-128
-// (AES-PMAC-SIV-256), or AES-256 (AES-PMAC-SIV-512).
-func NewAESPMACSIV(key []byte) (c *Cipher, err error) {
-	n := len(key)
-	if n != 32 && n != 64 {
-		return nil, ErrKeySize
-	}
-
-	macBlock, err := aes.NewCipher(key[:n/2])
-	if err != nil {
-		return nil, err
-	}
-
-	ctrBlock, err := aes.NewCipher(key[n/2:])
-	if err != nil {
-		return nil, err
-	}
-
-	c = new(Cipher)
-	c.h = pmac.New(macBlock)
 	c.b = ctrBlock
 
 	return c, nil
