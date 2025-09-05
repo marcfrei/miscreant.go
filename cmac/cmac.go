@@ -9,6 +9,7 @@ package cmac
 
 import (
 	"crypto/cipher"
+	"crypto/subtle"
 	"hash"
 
 	"github.com/miscreant/miscreant.go/block"
@@ -43,10 +44,10 @@ func New(c cipher.Block) hash.Hash {
 
 	// Subkey generation, p. 7
 	d.k1.Encrypt(c)
-	d.k1.Dbl()
+	d.k1.MultiplyByX()
 
 	copy(d.k2[:], d.k1[:])
-	d.k2.Dbl()
+	d.k2.MultiplyByX()
 
 	return d
 }
@@ -64,20 +65,20 @@ func (d *cmac) Write(p []byte) (nn int, err error) {
 	left := block.Size - d.pos
 
 	if uint(len(p)) > left {
-		xor(d.buf[d.pos:], p[:left])
+		xorBytes(d.buf[d.pos:], p[:left])
 		p = p[left:]
 		d.buf.Encrypt(d.c)
 		d.pos = 0
 	}
 
 	for uint(len(p)) > block.Size {
-		xor(d.buf[:], p[:block.Size])
+		xorBytes(d.buf[:], p[:block.Size])
 		p = p[block.Size:]
 		d.buf.Encrypt(d.c)
 	}
 
 	if len(p) > 0 {
-		xor(d.buf[d.pos:], p)
+		xorBytes(d.buf[d.pos:], p)
 		d.pos += uint(len(p))
 	}
 	return
@@ -107,8 +108,6 @@ func (d *cmac) Size() int { return len(d.digest) }
 
 func (d *cmac) BlockSize() int { return d.c.BlockSize() }
 
-func xor(a, b []byte) {
-	for i, v := range b {
-		a[i] ^= v
-	}
+func xorBytes(a, b []byte) {
+	subtle.XORBytes(a, a, b)
 }

@@ -159,7 +159,7 @@ func (c *Cipher) s2v(s [][]byte, sn []byte) []byte {
 
 		copy(tmp[:], h.Sum(tmp[:0]))
 		h.Reset()
-		d.Dbl()
+		d.MultiplyByX()
 		xor(d[:], tmp[:])
 	}
 
@@ -175,7 +175,7 @@ func (c *Cipher) s2v(s [][]byte, sn []byte) []byte {
 	} else {
 		copy(tmp[:], sn)
 		tmp[len(sn)] = 0x80
-		d.Dbl()
+		d.MultiplyByX()
 	}
 	xor(tmp[:], d[:])
 	_, err = h.Write(tmp[:])

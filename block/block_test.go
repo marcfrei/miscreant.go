@@ -62,7 +62,7 @@ func TestDbl(t *testing.T) {
 	for i, tt := range loadDblExamples() {
 		var b Block
 		copy(b[:], tt.input)
-		b.Dbl()
+		b.MultiplyByX()
 
 		if !bytes.Equal(b[:], tt.output) {
 			t.Errorf("test %d: dbl mismatch\n\twant %x\n\thave %x", i, tt.output, b)
