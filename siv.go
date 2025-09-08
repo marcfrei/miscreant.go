@@ -160,7 +160,7 @@ func (c *Cipher) s2v(s [][]byte, sn []byte) []byte {
 		copy(tmp[:], h.Sum(tmp[:0]))
 		h.Reset()
 		d.MultiplyByX()
-		xor(d[:], tmp[:])
+		xorBytes(d[:], tmp[:])
 	}
 
 	tmp.Clear()
@@ -177,7 +177,7 @@ func (c *Cipher) s2v(s [][]byte, sn []byte) []byte {
 		tmp[len(sn)] = 0x80
 		d.MultiplyByX()
 	}
-	xor(tmp[:], d[:])
+	xorBytes(tmp[:], d[:])
 	_, err = h.Write(tmp[:])
 	if err != nil {
 		panic(err)
@@ -186,10 +186,8 @@ func (c *Cipher) s2v(s [][]byte, sn []byte) []byte {
 	return h.Sum(tmp[:0])
 }
 
-func xor(a, b []byte) {
-	for i, v := range b {
-		a[i] ^= v
-	}
+func xorBytes(a, b []byte) {
+	subtle.XORBytes(a, a, b)
 }
 
 func zeroIVBits(iv []byte) {
